@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lulu Go — University Prototype (English Version)</title>
+  <style>
+    :root{
+      --accent:#d6001c;
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --text:#1a1a1a;
+      --muted:#777;
+      --radius-xl:18px;
+      --shadow:0 10px 28px rgba(0,0,0,0.12);
+    }
+    body{
+      margin:0;
+      font-family:system-ui,Arial;
+      background:var(--bg);
+      color:var(--text);
+    }
+    .app{max-width:1000px;margin:0 auto;padding:16px;}
+
+    .header{
+      display:flex;align-items:center;gap:10px;margin-bottom:12px;
+    }
+    .logo{
+      width:42px;height:42px;border-radius:12px;
+      background:linear-gradient(135deg,#048c20,#d6001c);
+      color:#fff;font-weight:800;font-size:18px;
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:var(--shadow);
+    }
+    .h-title{font-size:20px;font-weight:700;}
+    .h-sub{font-size:12px;color:var(--muted);}
+
+    /* Navigation */
+    nav{background:#fff;padding:8px;border-radius:var(--radius-xl);box-shadow:var(--shadow);margin-bottom:16px;display:flex;gap:8px;}
+    nav button{
+      flex:1;padding:10px;border:none;border-radius:var(--radius-xl);
+      background:#eee;font-weight:600;cursor:pointer;
+    }
+    nav button.active{background:var(--accent);color:#fff;}
+
+    /* Screens */
+    .screen{display:none;}
+    .screen.active{display:block;animation:fade .3s ease;}
+    @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+    .card{background:var(--card);padding:16px;border-radius:var(--radius-xl);box-shadow:var(--shadow);margin-bottom:16px;}
+    .title{font-size:16px;font-weight:700;margin-bottom:6px;}
+    .sub{font-size:12px;color:var(--muted);margin-bottom:10px;}
+
+    .btn{padding:10px 14px;border-radius:12px;border:none;cursor:pointer;font-weight:600;}
+    .btn-primary{background:var(--accent);color:#fff;}
+    .btn-ghost{background:#eee;}
+
+    table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;}
+    th,td{padding:6px;border-bottom:1px solid #ddd;text-align:left;}
+
+    .cart-item{display:flex;justify-content:space-between;border-bottom:1px dashed #ccc;padding:6px 0;}
+    .remove-btn{background:#eee;padding:4px 8px;border-radius:8px;font-size:12px;cursor:pointer;}
+
+    video{width:100%;height:220px;background:#000;border-radius:16px;object-fit:cover;}
+    #camStatus{position:absolute;top:8px;right:8px;background:#fff;padding:6px 10px;border-radius:10px;font-size:12px;}
+
+    .receipt{white-space:pre;background:#111;color:#0f0;padding:12px;border-radius:12px;font-family:monospace;font-size:12px;}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <div class="logo">LG</div>
+      <div>
+        <div class="h-title">Lulu Go — Prototype</div>
+        <div class="h-sub">University Project — Self‑checkout demo</div>
+      </div>
+    </div>
+
+    <nav>
+      <button onclick="openScreen('home')" id="navHome" class="active">Home</button>
+      <button onclick="openScreen('scan')" id="navScan">Scan</button>
+      <button onclick="openScreen('payment')" id="navPay">Payment</button>
+      <button onclick="openScreen('about')" id="navAbout">About</button>
+    </nav>
+
+    <!-- HOME -->
+    <div id="screen-home" class="screen active">
+      <div class="card">
+        <div class="title">Welcome</div>
+        <div class="sub">Start scanning products or explore the demo features.</div>
+        <button class="btn btn-primary" onclick="openScreen('scan')">Start Scanning</button>
+      </div>
+    </div>
+
+    <!-- SCAN -->
+    <div id="screen-scan" class="screen">
+      <div class="card">
+        <div class="title">Camera Scanner</div>
+        <div class="sub">Scan a barcode of any product.</div>
+        <button class="btn btn-primary" id="toggleCam">Start / Stop Camera</button>
+        <div style="position:relative;margin-top:10px;">
+          <video id="video" autoplay muted playsinline></video>
+          <div id="camStatus">Camera Off</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="title">Cart</div>
+        <div id="cartList"></div>
+        <div style="margin-top:10px;font-weight:700;">Total: <span id="totalPrice">0.000 OMR</span></div>
+      </div>
+
+      <div class="card">
+        <div class="title">Product Database</div>
+        <table>
+          <thead><tr><th>SKU</th><th>Name</th><th>Price</th></tr></thead>
+          <tbody id="productTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PAYMENT -->
+    <div id="screen-payment" class="screen">
+      <div class="card">
+        <div class="title">Payment (Simulation)</div>
+        <div class="sub">This is a mock payment page.</div>
+        <div id="paySummary"></div>
+        <button class="btn btn-primary" onclick="alert('Payment simulated!')">Pay Now</button>
+      </div>
+
+      <div class="card">
+        <div class="title">Receipt</div>
+        <div id="receiptBox" class="receipt">No items yet.</div>
+        <button class="btn btn-ghost" onclick="printReceipt()">Print Receipt</button>
+      </div>
+    </div>
+
+    <!-- ABOUT -->
+    <div id="screen-about" class="screen">
+      <div class="card">
+        <div class="title">About Lulu Go</div>
+        <div class="sub">This is a university prototype demonstrating a self‑checkout concept.</div>
+        <ul>
+          <li>Camera barcode scanner</li>
+          <li>Local product database</li>
+          <li>Virtual cart system</li>
+          <li>Payment simulation</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ZXing -->
+  <script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
+  <script>
+    // NEW PRODUCT LIST (requested)
+    let products = [
+      {sku:'P001', name:'Water 500ml', price:0.500},
+      {sku:'P002', name:'Salt Chips', price:0.300},
+      {sku:'P003', name:'Chocolate Bar', price:0.750},
+      {sku:'P004', name:'Small Juice', price:0.400},
+      {sku:'P005', name:'Cupcake', price:0.800}
+    ];
+
+    let cart = [];
+    const reader = new ZXing.BrowserMultiFormatReader();
+    let stream = null;
+
+    const screens = {
+      home: document.getElementById('screen-home'),
+      scan: document.getElementById('screen-scan'),
+      payment: document.getElementById('screen-payment'),
+      about: document.getElementById('screen-about')
+    };
+
+    function openScreen(name){
+      Object.values(screens).forEach(s=>s.classList.remove('active'));
+      screens[name].classList.add('active');
+      document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+      document.getElementById('nav'+name.charAt(0).toUpperCase()+name.slice(1)).classList.add('active');
+    }
+
+    function renderProducts(){
+      const tb=document.getElementById('productTable');
+      tb.innerHTML='';
+      products.forEach(p=>{
+        tb.innerHTML += `<tr><td>${p.sku}</td><td>${p.name}</td><td>${p.price.toFixed(3)}</td></tr>`;
+      });
+    }
+
+    function renderCart(){
+      const c=document.getElementById('cartList');
+      c.innerHTML='';
+      let total=0;
+      cart.forEach((it,i)=>{
+        total+=it.price;
+        c.innerHTML+=`<div class='cart-item'><div>${it.name} (${it.sku})</div><div>${it.price.toFixed(3)} OMR <span class='remove-btn' onclick='removeItem(${i})'>X</span></div></div>`;
+      });
+      document.getElementById('totalPrice').textContent=total.toFixed(3)+' OMR';
+      updatePayment();
+    }
+
+    function removeItem(i){cart.splice(i,1);renderCart();buildReceipt();}
+
+    async function startCam(){
+      stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+      document.getElementById('video').srcObject=stream;
+      document.getElementById('camStatus').textContent='Camera On';
+      reader.decodeFromVideoElementContinuously(document.getElementById('video'), (res)=>{
+        if(res){ handleScan(res.text); }
+      });
+    }
+
+    function stopCam(){if(stream){stream.getTracks().forEach(t=>t.stop());}document.getElementById('camStatus').textContent='Camera Off';reader.reset();}
+
+    document.getElementById('toggleCam').onclick=()=>{
+      if(document.getElementById('camStatus').textContent.includes('Off')) startCam(); else stopCam();
+    };
+
+    function handleScan(code){
+      const p=products.find(x=>x.sku.toLowerCase()==code.toLowerCase());
+      if(p){cart.push(p);}else alert('Unknown SKU: '+code);
+      renderCart();buildReceipt();stopCam();
+    }
+
+    function updatePayment(){
+      const total=cart.reduce((a,b)=>a+b.price,0);
+      document.getElementById('paySummary').innerHTML=`Items: ${cart.length}<br>Total: ${total.toFixed(3)} OMR`;
+    }
+
+    function buildReceipt(){
+      if(cart.length===0){document.getElementById('receiptBox').textContent='No items yet.';return;}
+      let txt='Lulu Go Receipt\n-----------------\n';
+      cart.forEach(i=> txt+=`${i.name} (${i.sku}) - ${i.price.toFixed(3)} OMR\n`);
+      txt+='-----------------\nTotal: '+cart.reduce((a,b)=>a+b.price,0).toFixed(3)+' OMR';
+      document.getElementById('receiptBox').textContent=txt;
+    }
+
+    function printReceipt(){
+      const w=window.open('','_blank');
+      w.document.write(`<pre>${document.getElementById('receiptBox').textContent}</pre>`);
+      w.print();
+    }
+
+    renderProducts();
+  </script>
+</body>
+</html>
